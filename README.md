@@ -161,7 +161,7 @@ docker-compose up
 
 ---
 
-## Sample benchmark output
+## benchmark output
 
 ```
 Scenario: burst_traffic  (312 requests, 120s window)
@@ -194,24 +194,3 @@ Scenario: burst_traffic  (312 requests, 120s window)
 
 ---
 
-## Design decisions
-
-**Why PagedAttention-style block management?**
-Fixed-size KV blocks prevent memory fragmentation from variable-length sequences. Prefix hashing lets blocks be shared across requests with the same system prompt or conversation history.
-
-**Why simulate rather than run real inference?**
-A physics-based simulator lets us stress-test scheduling policies at scale (10K+ requests, heterogeneous topologies) without GPU hardware. The simulator is calibrated to match vLLM benchmarks on H100.
-
-**Why four schedulers instead of one?**
-Comparing baselines quantifies exactly how much each mechanism (memory awareness, SLA differentiation, prefix caching, NVLink routing) contributes to the improvement. Resume-friendly: you can point to a concrete 4× improvement in p99 TTFT.
-
----
-
-## Roadmap
-
-- [ ] Real vLLM backend integration (replace mock runtime)
-- [ ] RL-based scheduler (PPO, reward = SLA compliance - cost)
-- [ ] Failure injection: node loss, memory spike, NVLink degradation
-- [ ] Trace replay from real ChatML datasets (ShareGPT format)
-- [ ] Expert-parallel MoE routing (per-expert KV cache partitioning)
-- [ ] Grafana dashboard provisioning with pre-built panels
