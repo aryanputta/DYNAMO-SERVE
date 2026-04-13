@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  dynamo-serve:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"   # Dashboard
+      - "9090:9090"   # Prometheus metrics
+    environment:
+      - DYNAMO_LOG_LEVEL=INFO
+      - DYNAMO_NUM_NODES=8
+      - DYNAMO_GPU_TYPE=H100
+      - DYNAMO_SCHEDULER=kv_aware
+    volumes:
+      - ./results:/app/results
+    command: ["python", "dashboard/app.py", "--host", "0.0.0.0", "--port", "8080"]
+
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - dynamo-serve
+
+  grafana:
+    image: grafana/grafana:10.3.3
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./deploy/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./deploy/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
