@@ -5,12 +5,12 @@ build-backend = "setuptools.backends.legacy:build"
 [project]
 name = "dynamo-serve"
 version = "0.1.0"
-description = "Production-grade distributed LLM inference infrastructure platform with KV cache-aware scheduling"
+description = "Production-grade distributed LLM inference infrastructure with KV cache-aware scheduling, multi-node GPU placement, and SLA-based admission control — inspired by NVIDIA Dynamo and Blackwell-era serving systems."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "DYNAMO-SERVE contributors"}
+    {name = "aryan", email = "aryansputta@gmail.com"}
 ]
 keywords = ["llm", "inference", "kv-cache", "scheduling", "gpu", "distributed"]
 classifiers = [
@@ -49,6 +49,10 @@ dev = [
 dynamo-serve = "dynamo_serve.cli:main"
 dynamo-bench = "benchmarks.run_benchmarks:main"
 dynamo-dashboard = "dashboard.app:main"
+
+[project.urls]
+Homepage = "https://github.com/aryanputta/dynamo-serve"
+Repository = "https://github.com/aryanputta/dynamo-serve"
 
 [tool.setuptools.packages.find]
 where = ["."]
