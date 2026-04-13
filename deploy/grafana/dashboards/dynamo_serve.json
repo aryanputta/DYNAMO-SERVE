@@ -1,0 +1,242 @@
+{
+  "__inputs": [],
+  "__requires": [
+    {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
+    {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"}
+  ],
+  "annotations": {"list": []},
+  "description": "DYNAMO-SERVE — KV-Cache-Aware LLM Inference Infrastructure",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 100,
+      "title": "Latency",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 500},
+            {"color": "red", "value": 1000}
+          ]},
+          "unit": "ms"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 1},
+      "id": 1,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "textMode": "auto", "colorMode": "background"},
+      "title": "p99 TTFT",
+      "type": "stat",
+      "targets": [{"expr": "histogram_quantile(0.99, rate(dynamo_ttft_ms_bucket[1m]))", "legendFormat": "p99 TTFT"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 80},
+            {"color": "red", "value": 150}
+          ]},
+          "unit": "ms"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 1},
+      "id": 2,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "textMode": "auto", "colorMode": "background"},
+      "title": "p99 TPOT",
+      "type": "stat",
+      "targets": [{"expr": "histogram_quantile(0.99, rate(dynamo_tpot_ms_bucket[1m]))", "legendFormat": "p99 TPOT"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 1},
+      "id": 3,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "colorMode": "value"},
+      "title": "Tokens / sec",
+      "type": "stat",
+      "targets": [{"expr": "dynamo_tokens_per_sec", "legendFormat": "tok/s"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {"steps": [
+            {"color": "red", "value": null},
+            {"color": "yellow", "value": 0.5},
+            {"color": "green", "value": 0.8}
+          ]},
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 1},
+      "id": 4,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "colorMode": "background"},
+      "title": "KV Cache Hit Rate",
+      "type": "stat",
+      "targets": [{"expr": "dynamo_kv_hit_rate", "legendFormat": "hit rate"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 1},
+      "id": 5,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "colorMode": "value"},
+      "title": "Total Requests",
+      "type": "stat",
+      "targets": [{"expr": "sum(dynamo_requests_total)", "legendFormat": "requests"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short", "color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 1},
+      "id": 6,
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "orientation": "auto", "colorMode": "background"},
+      "title": "KV Spills",
+      "type": "stat",
+      "targets": [{"expr": "increase(dynamo_requests_total{status=\"spilled\"}[5m])", "legendFormat": "spills"}]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+      "id": 101,
+      "title": "Latency History",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {"unit": "ms", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "p50 TTFT"}, "properties": [{"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}}]},
+          {"matcher": {"id": "byName", "options": "p95 TTFT"}, "properties": [{"id": "color", "value": {"fixedColor": "#FADE2A", "mode": "fixed"}}]},
+          {"matcher": {"id": "byName", "options": "p99 TTFT"}, "properties": [{"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}]}
+        ]
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "id": 10,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "title": "TTFT Latency Percentiles",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(dynamo_ttft_ms_bucket[1m]))", "legendFormat": "p50 TTFT"},
+        {"expr": "histogram_quantile(0.95, rate(dynamo_ttft_ms_bucket[1m]))", "legendFormat": "p95 TTFT"},
+        {"expr": "histogram_quantile(0.99, rate(dynamo_ttft_ms_bucket[1m]))", "legendFormat": "p99 TTFT"}
+      ]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {"unit": "ms", "custom": {"lineWidth": 2}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "p50 TPOT"}, "properties": [{"id": "color", "value": {"fixedColor": "#73BF69", "mode": "fixed"}}]},
+          {"matcher": {"id": "byName", "options": "p99 TPOT"}, "properties": [{"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}}]}
+        ]
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "id": 11,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "title": "TPOT Latency Percentiles",
+      "type": "timeseries",
+      "targets": [
+        {"expr": "histogram_quantile(0.50, rate(dynamo_tpot_ms_bucket[1m]))", "legendFormat": "p50 TPOT"},
+        {"expr": "histogram_quantile(0.99, rate(dynamo_tpot_ms_bucket[1m]))", "legendFormat": "p99 TPOT"}
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 14},
+      "id": 102,
+      "title": "GPU Node Health",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0, "max": 1,
+          "thresholds": {"steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 0.65},
+            {"color": "red",   "value": 0.85}
+          ]},
+          "custom": {"lineWidth": 1, "fillOpacity": 20}
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 15},
+      "id": 20,
+      "options": {"legend": {"displayMode": "list", "placement": "right"}},
+      "title": "GPU Memory Pressure per Node",
+      "type": "timeseries",
+      "targets": [{"expr": "dynamo_gpu_memory_pressure", "legendFormat": "{{node_id}}"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0, "max": 1,
+          "thresholds": {"steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 0.70},
+            {"color": "red",   "value": 0.90}
+          ]},
+          "custom": {"lineWidth": 1, "fillOpacity": 20}
+        }
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 15},
+      "id": 21,
+      "options": {"legend": {"displayMode": "list", "placement": "right"}},
+      "title": "KV Cache Utilisation per Node",
+      "type": "timeseries",
+      "targets": [{"expr": "dynamo_kv_utilization", "legendFormat": "{{node_id}}"}]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 23},
+      "id": 103,
+      "title": "Throughput & Cost",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short", "custom": {"lineWidth": 2, "fillOpacity": 10}}},
+      "gridPos": {"h": 7, "w": 12, "x": 0, "y": 24},
+      "id": 30,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "title": "Token Throughput (tok/s)",
+      "type": "timeseries",
+      "targets": [{"expr": "dynamo_tokens_per_sec", "legendFormat": "tokens/sec"}]
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short", "custom": {"lineWidth": 2}}},
+      "gridPos": {"h": 7, "w": 12, "x": 12, "y": 24},
+      "id": 31,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}},
+      "title": "Active Requests per Node",
+      "type": "timeseries",
+      "targets": [{"expr": "dynamo_active_requests", "legendFormat": "{{node_id}}"}]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["llm", "inference", "kv-cache", "dynamo"],
+  "title": "DYNAMO-SERVE",
+  "uid": "dynamo-serve-v1",
+  "version": 1
+}
